@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Procurement Class Prediction</title>
+</head>
+<body>
+    <h1>Procurement Class Prediction</h1>
+    <form method="post" action="/predict">
+        <label for="description">Description:</label><br>
+        <input type="text" id="description" name="description"><br><br>
+
+        <label for="price">Price:</label><br>
+        <input type="text" id="price" name="price"><br><br>
+
+        <label for="duration">Duration (in days):</label><br>
+        <input type="text" id="duration" name="duration"><br><br>
+
+        <button type="submit">Predict</button>
+    </form>
+
+    {% if prediction %}
+    <h2>{{ prediction }}</h2>
+    {% endif %}
+</body>
+</html>
