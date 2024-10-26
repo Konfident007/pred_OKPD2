@@ -1,9 +1,6 @@
 from flask import Flask, request, render_template, jsonify
-import joblib
+from prediction import predict_class
 import re
-
-# Загружаем обученную модель
-model = joblib.load('procurement_classification_model.pkl')
 
 # Создаем Flask приложение
 app = Flask(__name__)
@@ -39,7 +36,7 @@ def predict():
     input_data = [description, float(price), int(duration)]
 
     # Предсказываем класс
-    predicted_class = model.predict([input_data])[0]
+    predicted_class = predict_class(input_data)
 
     # Отображаем результат
     return render_template('index.html', prediction=f'Предсказанный класс закупки: {predicted_class}')
