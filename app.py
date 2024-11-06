@@ -1,45 +1,71 @@
-from flask import Flask, request, render_template, jsonify
-from prediction import predict_class
-import re
+from flask import Flask, request, render_template
+import joblib
+import pandas as pd
+from sklearn.base import BaseEstimator, TransformerMixin
+from natasha import Segmenter, MorphVocab, NewsEmbedding, NewsMorphTagger, Doc
 
-# Создаем Flask приложение
 app = Flask(__name__)
 
-# Определяем функцию для проверки корректности ввода
-def validate_input(description, price, duration):
-    if not isinstance(description, str) or len(description.strip()) == 0:
-        return False, "Некорректное описание. Оно должно быть непустой строкой."
-    if not re.match(r'^[0-9]+(\.[0-9]+)?$', price):
-        return False, "Некорректная цена. Она должна быть положительным числом."
-    if not re.match(r'^[0-9]+$', duration):
-        return False, "Некорректная длительность. Она должна быть положительным целым числом."
-    return True, "Корректный ввод"
+# Инициализация компонентов Natasha для лемматизации
+segmenter = Segmenter()
+morph_vocab = MorphVocab()
+emb = NewsEmbedding()
+morph_tagger = NewsMorphTagger(emb)
 
-# Маршрут для главной страницы
+# Функция для лемматизации текста
+def lemmatize_text(text):
+    doc = Doc(text)
+    doc.segment(segmenter)
+    doc.tag_morph(morph_tagger)
+    for token in doc.tokens:
+        token.lemmatize(morph_vocab)
+    lemmatized_text = ' '.join([token.lemma for token in doc.tokens])
+    return lemmatized_text
+
+# Кастомный трансформер для лемматизации
+class LemmatizerTransformer(BaseEstimator, TransformerMixin):
+    def __init__(self):
+        pass
+
+    def fit(self, X, y=None):
+        return self
+
+    def transform(self, X):
+        # Применяем функцию лемматизации к каждому элементу
+        return X.apply(lemmatize_text)
+
+# Загрузка модели с учетом кастомного трансформера
+model = joblib.load('best_model.pkl')
+
 @app.route('/')
-def index():
+def home():
     return render_template('index.html')
 
-# Маршрут для предсказания
 @app.route('/predict', methods=['POST'])
 def predict():
-    description = request.form['description']
-    price = request.form['price']
-    duration = request.form['duration']
+    try:
+        # Получение данных из формы
+        duration = request.form['duration']
+        price = request.form['price']
+        description = request.form['description']
 
-    # Проверяем корректность ввода
-    is_valid, message = validate_input(description, price, duration)
-    if not is_valid:
-        return render_template('index.html', prediction=message)
+        # Проверка и преобразование данных
+        duration = float(duration)
+        price = float(price)
 
-    # Подготавливаем данные для предсказания
-    input_data = [description, float(price), int(duration)]
+        # Создание DataFrame с входными данными
+        input_data = pd.DataFrame({
+            'Длительность работ': [duration],
+            'Цена контракта': [price],
+            'Объект закупки': [description]
+        })
 
-    # Предсказываем класс
-    predicted_class = predict_class(input_data)
+        # Получение предсказания от модели
+        prediction = model.predict(input_data)
 
-    # Отображаем результат
-    return render_template('index.html', prediction=f'Предсказанный класс закупки: {predicted_class}')
+        return render_template('index.html', prediction_text=f'Предсказанный код ОКПД-2: {prediction[0]}')
+    except Exception as e:
+        return render_template('index.html', prediction_text=f'Ошибка: {str(e)}')
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app.run(debug=True)

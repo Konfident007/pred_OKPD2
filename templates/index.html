@@ -1,26 +1,26 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Procurement Class Prediction</title>
+    <title>Предсказание кода ОКПД-2</title>
 </head>
 <body>
-    <h1>Procurement Class Prediction</h1>
-    <form method="post" action="/predict">
-        <label for="description">Description:</label><br>
-        <input type="text" id="description" name="description"><br><br>
+    <h2>Введите данные для предсказания кода ОКПД-2</h2>
+    <form action="/predict" method="post">
+        <label for="duration">Длительность работ (в секундах):</label><br>
+        <input type="text" id="duration" name="duration" required><br><br>
 
-        <label for="price">Price:</label><br>
-        <input type="text" id="price" name="price"><br><br>
+        <label for="price">Цена контракта:</label><br>
+        <input type="text" id="price" name="price" required><br><br>
 
-        <label for="duration">Duration (in days):</label><br>
-        <input type="text" id="duration" name="duration"><br><br>
+        <label for="description">Объект закупки:</label><br>
+        <textarea id="description" name="description" rows="4" cols="50" required></textarea><br><br>
 
-        <button type="submit">Predict</button>
+        <input type="submit" value="Предсказать">
     </form>
 
-    {% if prediction %}
-    <h2>{{ prediction }}</h2>
+    {% if prediction_text %}
+        <h3>{{ prediction_text }}</h3>
     {% endif %}
 </body>
 </html>
