@@ -3,24 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <title>Предсказание кода ОКПД-2</title>
+    <!-- Подключение Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        /* Остальные ваши стили */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+
+        h2, h3, h4 {
+            margin-top: 20px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            font-family: inherit;
+        }
+
+        input[type="submit"] {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .error-message {
+            margin-top: 20px;
+            font-size: 18px;
+            color: red;
+        }
+
+        @media screen and (max-width: 600px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+            }
+
+            th, td {
+                text-align: right;
+            }
+
+            th {
+                position: relative;
+                padding-left: 50%;
+            }
+
+            th::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 0;
+                width: 50%;
+                padding-left: 15px;
+                font-weight: bold;
+                text-align: left;
+            }
+        }
+    </style>
 </head>
 <body>
     <h2>Введите данные для предсказания кода ОКПД-2</h2>
     <form action="/predict" method="post">
-        <label for="duration">Длительность работ (в секундах):</label><br>
-        <input type="text" id="duration" name="duration" required><br><br>
+        <label for="duration">Длительность работ (в днях):</label><br>
+        <input type="text" id="duration" name="duration" required placeholder="Например, 30"><br>
 
         <label for="price">Цена контракта:</label><br>
-        <input type="text" id="price" name="price" required><br><br>
+        <input type="text" id="price" name="price" required placeholder="Например, 500000"><br>
 
         <label for="description">Объект закупки:</label><br>
-        <textarea id="description" name="description" rows="4" cols="50" required></textarea><br><br>
+        <textarea id="description" name="description" rows="4" cols="50" required placeholder="Опишите объект закупки"></textarea><br>
 
         <input type="submit" value="Предсказать">
     </form>
 
-    {% if prediction_text %}
-        <h3>{{ prediction_text }}</h3>
+    {% if error_message %}
+        <div class="error-message">
+            <h3>{{ error_message }}</h3>
+        </div>
     {% endif %}
+
+    {% if prediction_text %}
+        <div class="message">
+            <h3>{{ prediction_text }}</h3>
+            {% if group_message %}
+                <h4>Группа: {{ group_message }}</h4>
+            {% endif %}
+        </div>
+    {% endif %}
+
+   <h2>Справочная информация по кодам ОКПД-2</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Код ОКПД-2</th>
+                <th>Краткое описание</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>41.1</td>
+                <td>Разработка проектов зданий</td>
+            </tr>
+            <tr>
+                <td>41.2</td>
+                <td>Строительство жилых и нежилых зданий</td>
+            </tr>
+            <tr>
+                <td>42.1</td>
+                <td>Строительство автомобильных дорог и железных дорог</td>
+            </tr>
+            <tr>
+                <td>42.2</td>
+                <td>Строительство коммунальных объектов для обеспечения электроэнергией и телекоммуникациями</td>
+            </tr>
+            <tr>
+                <td>42.9</td>
+                <td>Строительство прочих инженерных сооружений</td>
+            </tr>
+            <tr>
+                <td>43.1</td>
+                <td>Разборка и снос зданий; подготовка строительной площадки</td>
+            </tr>
+            <tr>
+                <td>43.2</td>
+                <td>Электромонтажные, водопроводные и прочие строительные монтажные работы</td>
+            </tr>
+            <tr>
+                <td>43.3</td>
+                <td>Работы по завершающей отделке зданий</td>
+            </tr>
+            <tr>
+                <td>43.9</td>
+                <td>Прочие специализированные строительные работы</td>
+            </tr>
+            <tr>
+                <td>71.1</td>
+                <td>Архитектурная деятельность, инженерные изыскания и технические консультации</td>
+            </tr>
+        </tbody>
+    </table>
 </body>
 </html>
